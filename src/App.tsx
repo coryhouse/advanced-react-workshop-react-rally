@@ -1,32 +1,15 @@
-import { useEffect, useState } from "react";
 import "./App.css";
-import { Food } from "./food";
+import { useFoods } from "./queries/useFoods";
 
 function App() {
-  const [foods, setFoods] = useState<Food[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    async function getFoods() {
-      try {
-        setLoading(true);
-        const resp = await fetch("http://localhost:3001/foods");
-        const json = await resp.json();
-        setFoods(json);
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    getFoods();
-  }, []);
+  const foodsQuery = useFoods();
 
   function renderFoods() {
+    if (!foodsQuery.data) return;
+
     return (
       <ul>
-        {foods.map((food) => (
+        {foodsQuery.data.map((food) => (
           <li key={food.id}>{food.name}</li>
         ))}
       </ul>
@@ -37,9 +20,9 @@ function App() {
     <>
       <h1>Menu</h1>
 
-      {error && <p>Sorry, an error occurred.</p>}
+      {foodsQuery.error && <p>Sorry, an error occurred.</p>}
 
-      {loading ? <p>Loading...</p> : renderFoods()}
+      {foodsQuery.isLoading ? <p>Loading...</p> : renderFoods()}
     </>
   );
 }
