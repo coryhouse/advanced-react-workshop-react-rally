@@ -1,11 +1,27 @@
-export type Food = {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  description: string;
-  tags: Array<FoodTag>;
-};
+import { z } from "zod";
+
+export const tagSchema = z.enum([
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+  "Dessert",
+  "Drink",
+  "Appetizer",
+  "Spicy",
+  "Vegetarian",
+  "Alcoholic",
+]);
+
+export const foodSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  image: z.string(),
+  price: z.number(),
+  description: z.string(),
+  tags: z.array(tagSchema),
+});
+
+export type Food = z.infer<typeof foodSchema>;
 
 export const foodTags = [
   "Breakfast",
@@ -19,7 +35,7 @@ export const foodTags = [
   "Alcoholic",
 ] as const;
 
-export type FoodTag = (typeof foodTags)[number];
+export type FoodTag = z.infer<typeof tagSchema>;
 
 export const foods: Array<Food> = [
   {

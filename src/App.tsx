@@ -1,7 +1,20 @@
+import { useSearchParams } from "react-router-dom";
 import "./App.css";
 import { useFoods } from "./queries/useFoods";
 
+function useSearch() {
+  const [params, setParams] = useSearchParams();
+
+  return [
+    params.get("search")?.toString(),
+    (search: string) => {
+      setParams({ search });
+    },
+  ] as const;
+}
+
 function App() {
+  const [search, setSearch] = useSearch();
   const foodsQuery = useFoods();
 
   function renderFoods() {
@@ -19,9 +32,12 @@ function App() {
   return (
     <>
       <h1>Menu</h1>
-
-      {foodsQuery.error && <p>Sorry, an error occurred.</p>}
-
+      <input
+        type="search"
+        placeholder="Search..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       {foodsQuery.isLoading ? <p>Loading...</p> : renderFoods()}
     </>
   );
