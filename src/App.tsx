@@ -6,7 +6,7 @@ function useSearch() {
   const [params, setParams] = useSearchParams();
 
   return [
-    params.get("search")?.toString(),
+    params.get("search")?.toString() ?? "",
     (search: string) => {
       setParams({ search });
     },
@@ -17,12 +17,19 @@ function App() {
   const [search, setSearch] = useSearch();
   const foodsQuery = useFoods();
 
+  // Derived state
+  const filteredFoods =
+    foodsQuery.data?.filter((food) =>
+      food.name.toLowerCase().includes(search.toLowerCase())
+    ) ?? [];
+  const numFoods = filteredFoods.length;
+
   function renderFoods() {
     if (!foodsQuery.data) return;
 
     return (
       <ul>
-        {foodsQuery.data.map((food) => (
+        {filteredFoods.map((food) => (
           <li key={food.id}>{food.name}</li>
         ))}
       </ul>
@@ -38,6 +45,7 @@ function App() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+      {numFoods === 0 && !foodsQuery.isLoading && <p>No foods found</p>}
       {foodsQuery.isLoading ? <p>Loading...</p> : renderFoods()}
     </>
   );
