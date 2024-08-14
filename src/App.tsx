@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+import { Food } from "./food";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [foods, setFoods] = useState<Food[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    async function getFoods() {
+      try {
+        setLoading(true);
+        const resp = await fetch("http://localhost:3001/foods");
+        const json = await resp.json();
+        setFoods(json);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    getFoods();
+  }, []);
+
+  function renderFoods() {
+    return (
+      <ul>
+        {foods.map((food) => (
+          <li key={food.id}>{food.name}</li>
+        ))}
+      </ul>
+    );
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1>Menu</h1>
+
+      {error && <p>Sorry, an error occurred.</p>}
+
+      {loading ? <p>Loading...</p> : renderFoods()}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
